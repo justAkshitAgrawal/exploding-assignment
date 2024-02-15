@@ -48,15 +48,22 @@ const categoryFilters = [
 
 const FilterBy = () => {
   return (
-    <div className="flex items-center gap-5">
-      <p className="text-xs font-medium">FILTER BY:</p>
-      <Filter data={yearFilters} />
-      <Filter data={categoryFilters} />
-      <div className="flex items-center rounded-md gap-1 px-2 border border-gray-300 hover:border-black ">
+    <div className="flex flex-col md:flex-row items-center gap-5">
+      <p className="text-xs font-medium self-start md:hidden">FILTER BY:</p>
+
+      <div className="flex items-center gap-5">
+        <p className="text-xs font-medium max-md:hidden text-nowrap">
+          FILTER BY:
+        </p>
+        <Filter data={yearFilters} />
+        <Filter data={categoryFilters} />
+      </div>
+      <div className="flex items-center rounded-md gap-1 px-2 border border-gray-300 hover:border-black w-full ">
         <MdOutlineSearch />
         <Input
           placeholder="Search Trends"
-          className="w-[200px] p-0 hover:ring-0"
+          className="md:w-[200px] p-0 hover:ring-0"
+          disabled
         />
         <Button
           className="

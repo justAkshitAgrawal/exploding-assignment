@@ -39,7 +39,7 @@ export function Filter({ data }: FilterProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between hover:border-black border-gray-300 text-gray-400"
+          className="md:w-[200px] w-[150px]  justify-between hover:border-black border-gray-300 text-gray-400"
         >
           {value
             ? data.find((framework) => framework.value === value)?.label

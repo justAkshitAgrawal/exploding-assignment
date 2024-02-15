@@ -80,29 +80,29 @@ const ChartCard = () => {
   };
 
   return (
-    <Card>
+    <Card className="">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between ">
           <div className="flex items-center space-x-4">
-            <Filter data={yearFilters} />
-            <div className="border border-blue-300 w-[200px] p-2 rounded-md bg-blue-600/20 flex items-center justify-evenly">
+            {/* <Filter data={yearFilters} /> */}
+            {/* <div className="border border-blue-300 md:w-[200px] p-2 rounded-md bg-blue-600/20 flex items-center justify-evenly">
               <HiOutlineTrendingUp className="text-blue-600" />
               <p className="text-blue-600 text-xs font-semibold">Trending</p>
-              <Switch />
+              <Switch disabled />
               <TooltipProvider>
                 <TooltipComponent>
                   <TooltipTrigger className="">
                     <FaCircleQuestion className="text-blue-600" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>{`"Steep, hockey stick growth."`}</p>
+                    <p>{`Forecast predicts the growth of this trend over the next 12 months. Our forecasting uses a deep machine learning model trained on millions of data points.`}</p>
                   </TooltipContent>
                 </TooltipComponent>
               </TooltipProvider>
-            </div>
+            </div> */}
           </div>
-          <div className="flex gap-6">
-            <p className="text-blue-600 flex flex-col items-center text-2xl font-bold">
+          <div className="flex gap-6 max-md:hidden">
+            <p className="text-blue-600 flex flex-col items-center md:text-2xl font-bold">
               {"9.9K"}
               <span className="text-xs mt-1 text-gray-500">Volume</span>
             </p>
@@ -114,18 +114,30 @@ const ChartCard = () => {
       </CardHeader>
 
       <CardContent>
+        <div className="flex gap-6 md:hidden mb-4">
+          <p className="text-blue-600 flex flex-col items-center md:text-2xl font-bold">
+            {"9.9K"}
+            <span className="text-xs mt-1 text-gray-500">Volume</span>
+          </p>
+          <p className="text-green-500 flex flex-col items-center md:text-2xl font-bold">
+            {"99"}%<span className="text-xs mt-1 text-gray-500">Growth</span>
+          </p>{" "}
+        </div>
         <Line
           data={{
             labels: generateLabels(),
             datasets: [
               {
-                label: "Price",
+                // label: "Price",
                 data: generateData(),
                 borderColor: "rgb(46, 92, 229)",
-                backgroundColor: "rgba(46, 92, 229, 0.2)",
+                backgroundColor: "#2e5ce5",
                 tension: 0.5,
-                pointStyle: "rectRot",
-                pointRadius: 1,
+                pointStyle: "circle",
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                pointBackgroundColor: "#2e5ce5",
+                pointHitRadius: 100,
               },
             ],
           }}
@@ -143,8 +155,24 @@ const ChartCard = () => {
                 display: false,
               },
               tooltip: {
-                mode: "index", // Show tooltip when hovering anywhere on the chart
-                intersect: false, // Allow tooltips to be displayed even if not directly hovering over a point
+                mode: "nearest",
+                intersect: false,
+                backgroundColor: "rgb(214, 233, 251)",
+                displayColors: false,
+                titleColor: "rgb(0, 0, 0)",
+                bodyColor: "#2e5ce5",
+                titleAlign: "center",
+                bodyAlign: "center",
+                padding: 10,
+                bodyFont: {
+                  size: 19,
+                  weight: 600,
+                },
+                callbacks: {
+                  label: function (tooltip) {
+                    return `${tooltip.formattedValue.slice(0, 3)}K/mo`;
+                  },
+                },
               },
             },
           }}

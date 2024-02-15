@@ -78,10 +78,12 @@ const DisplayCard = ({
   };
 
   return (
-    <Card className={`w-full hover:border-blue-500 cursor-pointer relative`}>
+    <Card
+      className={`w-full hover:border-blue-500 cursor-pointer relative group scale-[0.9]`}
+    >
       <CardHeader className={` ${type === "pro" ? "blur" : ""}`}>
         <CardTitle className="flex justify-between">
-          <h2>{title}</h2>
+          <h2 className="group-hover:text-blue-600 transition-all">{title}</h2>
           <div className="flex gap-4">
             <p className="text-blue-600 flex flex-col items-center">
               {volume}

@@ -14,16 +14,21 @@ import Link from "next/link";
 const Home = () => {
   return (
     <div className="mt-16 flex flex-col items-center">
-      <h1 className="text-4xl font-semibold text-center">
-        Discover Exploding Topics
+      <h1 className="md:text-4xl text-3xl font-semibold text-center">
+        Discover Exploding
+        <br className="md:hidden" />
+        Topics
       </h1>
       <p className="text-center mt-8 text-gray-600 font-light">
-        We surface rapidly growing topics before they take off.
+        We surface rapidly growing topics before
+        <br className="md:hidden" />
+        they take off.
       </p>
       <div className="mt-8">
-        <FilterBy />
+        {" "}
+        <FilterBy />{" "}
       </div>
-      <div className="grid grid-cols-3 mt-10 place-items-center	gap-10 max-w-[82rem] w-max pb-10">
+      <div className="grid md:grid-cols-3 mt-10 place-items-center	md:gap-10 md:max-w-[82rem] md:w-max pb-10">
         {Array(14)
           .fill(0)
           .map((_, i) => (
@@ -41,7 +46,7 @@ const Home = () => {
           ))}
       </div>
 
-      <div className="self-start pb-20">
+      <div className="md:self-start pb-20">
         <Pagination>
           <PaginationContent>
             <PaginationItem>

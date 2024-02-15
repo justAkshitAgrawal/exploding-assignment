@@ -11,7 +11,7 @@ const CategoriesCard = () => {
         <Separator />
       </CardHeader>
 
-      <CardContent className="flex items-center space-x-4">
+      <CardContent className="flex flex-wrap items-center gap-4">
         <Badge className="text-blue-600 bg-blue-600/20 hover:bg-blue-600 hover:text-white cursor-default">
           <p>Artificial Intelligence</p>
         </Badge>
