@@ -84,11 +84,11 @@ const ChartCard = () => {
       <CardHeader>
         <div className="flex items-center justify-between ">
           <div className="flex items-center space-x-4">
-            {/* <Filter data={yearFilters} /> */}
-            {/* <div className="border border-blue-300 md:w-[200px] p-2 rounded-md bg-blue-600/20 flex items-center justify-evenly">
+            <Filter data={yearFilters} />
+            <div className="border border-blue-300 md:w-[200px] p-1.5 rounded-md bg-blue-600/20 flex items-center md:justify-evenly max-md:space-x-1">
               <HiOutlineTrendingUp className="text-blue-600" />
               <p className="text-blue-600 text-xs font-semibold">Trending</p>
-              <Switch disabled />
+              <Switch disabled className="max-md:scale-75" />
               <TooltipProvider>
                 <TooltipComponent>
                   <TooltipTrigger className="">
@@ -99,7 +99,7 @@ const ChartCard = () => {
                   </TooltipContent>
                 </TooltipComponent>
               </TooltipProvider>
-            </div> */}
+            </div>
           </div>
           <div className="flex gap-6 max-md:hidden">
             <p className="text-blue-600 flex flex-col items-center md:text-2xl font-bold">
