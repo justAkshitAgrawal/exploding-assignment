@@ -17,7 +17,7 @@ const Nav = () => {
         <h1 className="text-xl font-bold">EXPLODING TOPICS</h1>
       </Link>
 
-      <div className="md:flex items-center space-x-10 font-medium text-gray-500 text-[14px] hidden">
+      <div className="md:flex z-50 items-center space-x-10 font-medium text-gray-500 text-[14px] hidden">
         <Link href={"/"} className="hover:text-black">
           About
         </Link>
