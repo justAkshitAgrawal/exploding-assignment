@@ -61,6 +61,12 @@ const ChartCard = () => {
     const data = [];
     const numDataPoints = 60;
     let currentValue = 1000;
+    data.push(0);
+    data.push(129);
+    data.push(100);
+    data.push(150);
+    data.push(250);
+    data.push(220);
     for (let i = 0; i < numDataPoints; i++) {
       const volatility = Math.random() * 50;
       const direction = Math.random() > 0.5 ? 1 : -1;
@@ -69,12 +75,54 @@ const ChartCard = () => {
     }
     return data;
   };
-
+  const triangleGradientPlugin = {
+    id: "triangleGradient",
+    beforeDraw: (chart: any, args: any, options: any) => {
+      const ctx = chart.ctx;
+      const chartArea = chart.chartArea;
+      const gradient = ctx.createLinearGradient(
+        chartArea.left, // Start x-coordinate (left side of the chart)
+        chartArea.bottom, // Start y-coordinate (bottom of the chart)
+        chartArea.right, // End x-coordinate (right side of the chart)
+        chartArea.bottom // End y-coordinate (bottom of the chart)
+      );
+      gradient.addColorStop(0, "rgba(46, 92, 229, 0.2)"); // Blue
+      gradient.addColorStop(1, "rgba(46, 92, 229, 0.05)"); // Blue
+      ctx.save();
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.moveTo(chartArea.left, chartArea.bottom);
+      ctx.lineTo(chartArea.right, chartArea.bottom);
+      ctx.lineTo(chartArea.right, chartArea.top);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    },
+  };
   const generateLabels = () => {
     const labels = [];
-    const numDataPoints = 60;
-    for (let i = 0; i < numDataPoints; i++) {
-      labels.push(`Day ${i + 1}`);
+    // const numDataPoints = 60;
+    // for (let i = 0; i < numDataPoints; i++) {
+    //   labels.push(`Day ${i + 1}`);
+    // }
+    // return labels;
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    for (let i = 0; i < 12; i++) {
+      labels.push(months[i]);
     }
     return labels;
   };
@@ -176,7 +224,17 @@ const ChartCard = () => {
               },
             },
           }}
+          plugins={[triangleGradientPlugin]}
         />
+        <div className="flex justify-between ml-16">
+          {[2019, 2020, 2021, 2022, 2023, 2024].map((year) => {
+            return (
+              <div key={year} className=" text-gray-400 text-xs">
+                <p>{year}</p>
+              </div>
+            );
+          })}
+        </div>
       </CardContent>
 
       <CardFooter>
