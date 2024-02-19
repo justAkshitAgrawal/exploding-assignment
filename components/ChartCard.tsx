@@ -74,10 +74,7 @@ const ChartCard = () => {
     const trend = createTrend(data, "x", "y");
     const minDate = Math.min(...data.map((d) => d.x));
     const maxDate = Math.max(...data.map((d) => d.x));
-    console.log("trendData:", [
-      { y: trend.calcY(minDate), x: minDate },
-      { y: trend.calcY(maxDate), x: maxDate },
-    ]); // Log to inspect!
+
     return [
       { y: trend.calcY(minDate), x: minDate },
       { y: trend.calcY(maxDate), x: maxDate },
@@ -166,19 +163,20 @@ const ChartCard = () => {
           </p>{" "}
         </div>
         <ResponsiveContainer width="100%" height={400}>
-          <LineChart
+          <AreaChart
             data={data}
             margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
           >
-            {/* <defs>
-              <linearGradient id="colorY" x1="0" y1="0" x2="0" y2="1">
+            <defs>
+              <linearGradient id="colorY" x1="1" y1="0" x2="0" y2="0">
                 <stop offset="10%" stopColor="#2e5ce5" stopOpacity={0} />
-                <stop offset="100%" stopColor="#2e5ce5" stopOpacity={0.8} />
+                <stop offset="100%" stopColor="#2e5ce5" stopOpacity={0.7} />
               </linearGradient>
-            </defs> */}
+            </defs>
             <YAxis
               domain={["auto", "auto"]} // Use 'auto' to see if YAxis can recalculate
               allowDataOverflow={true} // Temporarily allow values outside boundaries
+              fontSize={10}
             />{" "}
             <XAxis
               dataKey="x"
@@ -199,28 +197,26 @@ const ChartCard = () => {
                 />
               }
             />
-            <Line
-              type="linear"
+            <Area
+              type="monotoneY"
               data={trendData()}
               dataKey="y"
-              stroke="#ff7300" // Your desired trendline color
-              strokeWidth={2} // Choose appropriate width
-              opacity={1}
-              z={1}
-              legendType="none"
+              isAnimationActive={false} // Disables animations for this area
+              strokeWidth={0}
+              fillOpacity={0.5}
+              fill="url(#colorY)"
               dot={false}
+              activeDot={false}
             />
-            <Line
+            <Area
               type="monotone"
               dataKey="y"
               stroke="#2e5ce5"
               strokeWidth={3}
-              fillOpacity={0.5}
-              fill="url(#colorY)"
-              z={5}
+              fillOpacity={0}
               dot={false}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
 
         <div className="flex justify-between ml-16 mt-2">

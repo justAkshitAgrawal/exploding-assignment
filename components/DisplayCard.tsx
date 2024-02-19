@@ -8,18 +8,18 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { Line } from "react-chartjs-2";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
-  Legend,
-} from "chart.js";
-
+  Area,
+  AreaChart,
+  ResponsiveContainer,
+  ReferenceLine,
+} from "recharts";
 import {
   Tooltip as TooltipComponent,
   TooltipContent,
@@ -38,16 +38,8 @@ interface DisplayCardProps {
   type?: "pro" | "free";
 }
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Legend,
-  Tooltip
-);
-
+import moment from "moment";
+import createTrend from "trendline";
 const DisplayCard = ({
   title,
   description,
@@ -58,91 +50,39 @@ const DisplayCard = ({
 }: DisplayCardProps) => {
   const generateData = () => {
     const data = [];
-    const numDataPoints = 60; // Adjust this for more or fewer points
+    const numDataPoints = 100; // Adjust this for more or fewer points
     let currentValue = 1000; // Starting value
 
-    // Simulate a crypto-like chart with lots of fluctuations
     for (let i = 0; i < numDataPoints; i++) {
-      const volatility = Math.random() * 100; // Increased volatility
-      let direction = Math.random() > 0.5 ? 1 : -1; // Random direction of the trend
+      const volatility = Math.random() * 1000; // Increased volatility
+      let direction = Math.random(); // Random direction of the trend
 
-      // Introduce more frequent changes in direction
       if (Math.random() > 0.8) {
         direction *= -1; // Change direction more frequently
       }
 
       currentValue += volatility * direction; // Apply the change to the current value
-      data.push(currentValue); // Add the new value to the dataset
+      data.push({ x: new Date(2020, 0, i + 10), y: currentValue }); // Add the new value to the dataset
     }
     return data;
   };
 
-  const generateLabels = () => {
-    const labels = [];
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
+  const data = generateData().map((el) => {
+    return { ...el, x: moment(el.x).valueOf() };
+  });
+
+  const trendData = () => {
+    const trend = createTrend(data, "x", "y");
+    const minDate = Math.min(...data.map((d) => d.x));
+    const maxDate = Math.max(...data.map((d) => d.x));
+
+    return [
+      { y: trend.calcY(minDate), x: minDate },
+      { y: trend.calcY(maxDate), x: maxDate },
     ];
-
-    for (let i = 0; i < 12; i++) {
-      labels.push(months[i]);
-    }
-    return labels;
   };
 
-  const triangleGradientPlugin = {
-    id: "triangleGradient",
-    beforeDraw: (chart: any) => {
-      const ctx = chart.ctx;
-      const chartArea = chart.chartArea;
-      const xAxis = chart.scales.x;
-
-      // Find the first non-zero data point
-      const firstDataSet = chart.data.datasets[0].data;
-      const firstNonZeroIndex = firstDataSet.findIndex(
-        (value: any) => value !== 0
-      );
-
-      // Calculate the x position of the first non-zero data point
-      // This is where the triangle will start on the x-axis
-      const xStartPosition =
-        xAxis.getPixelForValue(firstNonZeroIndex) + Math.random() * 50;
-      const xEndPosition = chartArea.right;
-      const yEndPosition = chartArea.top;
-
-      // Create gradient
-      const gradient = ctx.createLinearGradient(
-        xStartPosition,
-        chartArea.bottom, // Start at the bottom of the chart area directly below the first non-zero data point
-        xEndPosition,
-        yEndPosition // End at the top right corner of the chart area
-      );
-
-      gradient.addColorStop(0, "rgba(46, 92, 229, 0.2)"); // Start color
-      gradient.addColorStop(1, "rgba(46, 92, 229, 0)"); // End color, making it transparent towards the end
-
-      ctx.save();
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.moveTo(xStartPosition, chartArea.bottom); // Start at the x-axis directly below the first non-zero data point
-      ctx.lineTo(xEndPosition, yEndPosition); // Draw line to the top right corner of the chart area
-      ctx.lineTo(xEndPosition, chartArea.bottom); // Go down to the bottom right corner of the chart area
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    },
-  };
-
+  const lastYValue = data[data.length - 1].y;
   return (
     <Card
       className={`w-full hover:border-blue-500 cursor-pointer relative group scale-[0.9]`}
@@ -164,41 +104,58 @@ const DisplayCard = ({
       </CardHeader>
 
       <CardContent className={` ${type === "pro" ? "blur" : ""}`}>
-        <Line
-          data={{
-            labels: generateLabels(),
-            datasets: [
-              {
-                label: "Price",
-                data: generateData(),
-                borderColor: "rgb(46, 92, 229)",
-                backgroundColor: "rgba(46, 92, 229, 0.2)",
-                tension: 0.5,
-                pointStyle: "rectRot",
-                pointRadius: 0,
-              },
-            ],
-          }}
-          options={{
-            scales: {
-              x: {
-                display: false,
-              },
-              y: {
-                display: false,
-              },
-            },
-            plugins: {
-              legend: {
-                display: false,
-              },
-              tooltip: {
-                enabled: false,
-              },
-            },
-          }}
-          plugins={[triangleGradientPlugin]}
-        />
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart
+            data={data}
+            margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+          >
+            <defs>
+              <linearGradient id="colorY" x1="1" y1="0" x2="0" y2="0">
+                <stop offset="10%" stopColor="#2e5ce5" stopOpacity={0} />
+                <stop offset="100%" stopColor="#2e5ce5" stopOpacity={0.7} />
+              </linearGradient>
+            </defs>
+            {/* <YAxis
+              domain={["auto", "auto"]} // Use 'auto' to see if YAxis can recalculate
+              allowDataOverflow={true} // Temporarily allow values outside boundaries
+              fontSize={10}
+              display={"none"}
+              visibility={"hidden"}
+            />{" "} */}
+            <XAxis
+              dataKey="x"
+              type="number"
+              domain={["auto", "auto"]}
+              scale="time"
+              visibility={"hidden"}
+            />
+            <CartesianGrid strokeDasharray="3 3" />
+            <Tooltip
+              contentStyle={{ backgroundColor: "#d6e9fb", border: "none" }}
+              cursor={false}
+              active={false}
+            />
+            <Area
+              type="monotoneY"
+              data={trendData()}
+              dataKey="y"
+              isAnimationActive={false} // Disables animations for this area
+              strokeWidth={0}
+              fillOpacity={0.5}
+              fill="url(#colorY)"
+              dot={false}
+              activeDot={false}
+            />
+            <Area
+              type="monotone"
+              dataKey="y"
+              stroke="#2e5ce5"
+              strokeWidth={3}
+              fillOpacity={0}
+              dot={false}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
         <p className="text-sm mt-5">{description}</p>
       </CardContent>
 
