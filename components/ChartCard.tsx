@@ -59,41 +59,62 @@ const yearFilters = [
 const ChartCard = () => {
   const generateData = () => {
     const data = [];
-    const numDataPoints = 60;
-    let currentValue = 1000;
-    data.push(0);
-    data.push(129);
-    data.push(100);
-    data.push(150);
-    data.push(250);
-    data.push(220);
+    const numDataPoints = 60; // Adjust this for more or fewer points
+    let currentValue = 1000; // Starting value
+
+    // Simulate a crypto-like chart with lots of fluctuations
     for (let i = 0; i < numDataPoints; i++) {
-      const volatility = Math.random() * 50;
-      const direction = Math.random() > 0.5 ? 1 : -1;
-      currentValue += volatility * direction;
-      data.push(currentValue);
+      const volatility = Math.random() * 100; // Increased volatility
+      let direction = Math.random() > 0.5 ? 1 : -1; // Random direction of the trend
+
+      // Introduce more frequent changes in direction
+      if (Math.random() > 0.8) {
+        direction *= -1; // Change direction more frequently
+      }
+
+      currentValue += volatility * direction; // Apply the change to the current value
+      data.push(currentValue); // Add the new value to the dataset
     }
     return data;
   };
   const triangleGradientPlugin = {
     id: "triangleGradient",
-    beforeDraw: (chart: any, args: any, options: any) => {
+    beforeDraw: (chart: any) => {
       const ctx = chart.ctx;
       const chartArea = chart.chartArea;
-      const gradient = ctx.createLinearGradient(
-        chartArea.left, // Start x-coordinate (left side of the chart)
-        chartArea.bottom, // Start y-coordinate (bottom of the chart)
-        chartArea.right, // End x-coordinate (right side of the chart)
-        chartArea.bottom // End y-coordinate (bottom of the chart)
+      const xAxis = chart.scales.x;
+
+      // Find the first non-zero data point
+      const firstDataSet = chart.data.datasets[0].data;
+      const firstNonZeroIndex = firstDataSet.findIndex(
+        (value: any) => value !== 0
       );
-      gradient.addColorStop(0, "rgba(46, 92, 229, 0.2)"); // Blue
-      gradient.addColorStop(1, "rgba(46, 92, 229, 0.05)"); // Blue
+
+      // Calculate the x position of the first non-zero data point
+      // This is where the triangle will start on the x-axis
+      const xStartPosition = xAxis.getPixelForValue(firstNonZeroIndex) + 20;
+
+      // The top right corner of the chart area
+      const xEndPosition = chartArea.right;
+      const yEndPosition = chartArea.top;
+
+      // Create gradient
+      const gradient = ctx.createLinearGradient(
+        xStartPosition,
+        chartArea.bottom, // Start at the bottom of the chart area directly below the first non-zero data point
+        xEndPosition,
+        yEndPosition // End at the top right corner of the chart area
+      );
+
+      gradient.addColorStop(0, "rgba(46, 92, 229, 0.2)"); // Start color
+      gradient.addColorStop(1, "rgba(46, 92, 229, 0)"); // End color, making it transparent towards the end
+
       ctx.save();
       ctx.fillStyle = gradient;
       ctx.beginPath();
-      ctx.moveTo(chartArea.left, chartArea.bottom);
-      ctx.lineTo(chartArea.right, chartArea.bottom);
-      ctx.lineTo(chartArea.right, chartArea.top);
+      ctx.moveTo(xStartPosition, chartArea.bottom); // Start at the x-axis directly below the first non-zero data point
+      ctx.lineTo(xEndPosition, yEndPosition); // Draw line to the top right corner of the chart area
+      ctx.lineTo(xEndPosition, chartArea.bottom); // Go down to the bottom right corner of the chart area
       ctx.closePath();
       ctx.fill();
       ctx.restore();
