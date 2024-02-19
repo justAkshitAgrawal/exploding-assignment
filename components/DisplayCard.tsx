@@ -27,6 +27,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "./ui/button";
+import chartTrendline from "chartjs-plugin-trendline";
 
 interface DisplayCardProps {
   title: string;

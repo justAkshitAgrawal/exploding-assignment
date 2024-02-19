@@ -1,42 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 import { Filter } from "./Filter";
-
-import { Line } from "react-chartjs-2";
-
+import { HiOutlineTrendingUp } from "react-icons/hi";
+import { Switch } from "./ui/switch";
+import { FaCircleQuestion } from "react-icons/fa6";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
-  Legend,
-} from "chart.js";
-
+  Area,
+  AreaChart,
+  ResponsiveContainer,
+  ReferenceLine,
+} from "recharts";
 import {
-  Tooltip as TooltipComponent,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { HiOutlineTrendingUp } from "react-icons/hi";
-import { Switch } from "./ui/switch";
-
-import { FaCircleQuestion } from "react-icons/fa6";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Legend,
-  Tooltip
-);
+  Tooltip as TooltipComponent,
+} from "./ui/tooltip";
+import moment from "moment";
+import createTrend from "trendline";
 
 const yearFilters = [
   {
@@ -56,96 +45,80 @@ const yearFilters = [
     label: "12 Months",
   },
 ];
+
 const ChartCard = () => {
   const generateData = () => {
     const data = [];
-    const numDataPoints = 60; // Adjust this for more or fewer points
+    const numDataPoints = 100; // Adjust this for more or fewer points
     let currentValue = 1000; // Starting value
 
-    // Simulate a crypto-like chart with lots of fluctuations
     for (let i = 0; i < numDataPoints; i++) {
-      const volatility = Math.random() * 100; // Increased volatility
-      let direction = Math.random() > 0.5 ? 1 : -1; // Random direction of the trend
+      const volatility = Math.random() * 1000; // Increased volatility
+      let direction = Math.random(); // Random direction of the trend
 
-      // Introduce more frequent changes in direction
       if (Math.random() > 0.8) {
         direction *= -1; // Change direction more frequently
       }
 
       currentValue += volatility * direction; // Apply the change to the current value
-      data.push(currentValue); // Add the new value to the dataset
+      data.push({ x: new Date(2020, 0, i + 10), y: currentValue }); // Add the new value to the dataset
     }
     return data;
   };
-  const triangleGradientPlugin = {
-    id: "triangleGradient",
-    beforeDraw: (chart: any) => {
-      const ctx = chart.ctx;
-      const chartArea = chart.chartArea;
-      const xAxis = chart.scales.x;
 
-      // Find the first non-zero data point
-      const firstDataSet = chart.data.datasets[0].data;
-      const firstNonZeroIndex = firstDataSet.findIndex(
-        (value: any) => value !== 0
-      );
+  const data = generateData().map((el) => {
+    return { ...el, x: moment(el.x).valueOf() };
+  });
 
-      // Calculate the x position of the first non-zero data point
-      // This is where the triangle will start on the x-axis
-      const xStartPosition = xAxis.getPixelForValue(firstNonZeroIndex) + 20;
-
-      // The top right corner of the chart area
-      const xEndPosition = chartArea.right;
-      const yEndPosition = chartArea.top;
-
-      // Create gradient
-      const gradient = ctx.createLinearGradient(
-        xStartPosition,
-        chartArea.bottom, // Start at the bottom of the chart area directly below the first non-zero data point
-        xEndPosition,
-        yEndPosition // End at the top right corner of the chart area
-      );
-
-      gradient.addColorStop(0, "rgba(46, 92, 229, 0.2)"); // Start color
-      gradient.addColorStop(1, "rgba(46, 92, 229, 0)"); // End color, making it transparent towards the end
-
-      ctx.save();
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.moveTo(xStartPosition, chartArea.bottom); // Start at the x-axis directly below the first non-zero data point
-      ctx.lineTo(xEndPosition, yEndPosition); // Draw line to the top right corner of the chart area
-      ctx.lineTo(xEndPosition, chartArea.bottom); // Go down to the bottom right corner of the chart area
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    },
-  };
-  const generateLabels = () => {
-    const labels = [];
-    // const numDataPoints = 60;
-    // for (let i = 0; i < numDataPoints; i++) {
-    //   labels.push(`Day ${i + 1}`);
-    // }
-    // return labels;
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
+  const trendData = () => {
+    const trend = createTrend(data, "x", "y");
+    const minDate = Math.min(...data.map((d) => d.x));
+    const maxDate = Math.max(...data.map((d) => d.x));
+    console.log("trendData:", [
+      { y: trend.calcY(minDate), x: minDate },
+      { y: trend.calcY(maxDate), x: maxDate },
+    ]); // Log to inspect!
+    return [
+      { y: trend.calcY(minDate), x: minDate },
+      { y: trend.calcY(maxDate), x: maxDate },
     ];
+  };
 
-    for (let i = 0; i < 12; i++) {
-      labels.push(months[i]);
+  const lastYValue = data[data.length - 1].y;
+
+  const CustomTooltip = ({
+    active,
+    payload,
+  }: {
+    active: boolean;
+    payload: any;
+  }) => {
+    if (active && payload && payload.length) {
+      const date = new Date(payload[0].payload.x); // Access the date from the payload
+      const month = date.toLocaleString("default", { month: "short" });
+      return (
+        <div className="custom-tooltip bg-[#d6e9fb] p-2  rounded-md shadow-lg">
+          <p className="label text-center font-semibold text-xs">{`${month.toUpperCase()}`}</p>
+          <div className="flex items-center space-x-2">
+            <p className="intro text-[#2e5ce5] font-medium">{`${payload[0].value.toFixed(
+              2
+            )}/mo`}</p>
+            <TooltipProvider>
+              <TooltipComponent>
+                <TooltipTrigger className="">
+                  <FaCircleQuestion className="text-blue-600" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{`Forecast predicts the growth of this trend over the next 12 months. Our forecasting uses a deep machine learning model trained on millions of data points.`}</p>
+                </TooltipContent>
+              </TooltipComponent>
+            </TooltipProvider>
+          </div>
+        </div>
+      );
     }
-    return labels;
+
+    return null;
   };
 
   return (
@@ -192,62 +165,65 @@ const ChartCard = () => {
             {"99"}%<span className="text-xs mt-1 text-gray-500">Growth</span>
           </p>{" "}
         </div>
-        <Line
-          data={{
-            labels: generateLabels(),
-            datasets: [
-              {
-                // label: "Price",
-                data: generateData(),
-                borderColor: "rgb(46, 92, 229)",
-                backgroundColor: "#2e5ce5",
-                tension: 0.5,
-                pointStyle: "circle",
-                pointRadius: 0,
-                pointHoverRadius: 5,
-                pointBackgroundColor: "#2e5ce5",
-                pointHitRadius: 100,
-              },
-            ],
-          }}
-          options={{
-            scales: {
-              x: {
-                display: false,
-              },
-              y: {
-                // display: false,
-              },
-            },
-            plugins: {
-              legend: {
-                display: false,
-              },
-              tooltip: {
-                mode: "nearest",
-                intersect: false,
-                backgroundColor: "rgb(214, 233, 251)",
-                displayColors: false,
-                titleColor: "rgb(0, 0, 0)",
-                bodyColor: "#2e5ce5",
-                titleAlign: "center",
-                bodyAlign: "center",
-                padding: 10,
-                bodyFont: {
-                  size: 19,
-                  weight: 600,
-                },
-                callbacks: {
-                  label: function (tooltip) {
-                    return `${tooltip.formattedValue.slice(0, 3)}K/mo`;
-                  },
-                },
-              },
-            },
-          }}
-          plugins={[triangleGradientPlugin]}
-        />
-        <div className="flex justify-between ml-16">
+        <ResponsiveContainer width="100%" height={400}>
+          <LineChart
+            data={data}
+            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+          >
+            {/* <defs>
+              <linearGradient id="colorY" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="10%" stopColor="#2e5ce5" stopOpacity={0} />
+                <stop offset="100%" stopColor="#2e5ce5" stopOpacity={0.8} />
+              </linearGradient>
+            </defs> */}
+            <YAxis
+              domain={["auto", "auto"]} // Use 'auto' to see if YAxis can recalculate
+              allowDataOverflow={true} // Temporarily allow values outside boundaries
+            />{" "}
+            <XAxis
+              dataKey="x"
+              type="number"
+              domain={["auto", "auto"]}
+              scale="time"
+              visibility={"hidden"}
+            />
+            <CartesianGrid strokeDasharray="3 3" />
+            <Tooltip
+              contentStyle={{ backgroundColor: "#d6e9fb", border: "none" }}
+              cursor={false}
+              content={
+                <CustomTooltip
+                  active={true}
+                  payload={[{ value: 1000 }]}
+                  // label={}
+                />
+              }
+            />
+            <Line
+              type="linear"
+              data={trendData()}
+              dataKey="y"
+              stroke="#ff7300" // Your desired trendline color
+              strokeWidth={2} // Choose appropriate width
+              opacity={1}
+              z={1}
+              legendType="none"
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="y"
+              stroke="#2e5ce5"
+              strokeWidth={3}
+              fillOpacity={0.5}
+              fill="url(#colorY)"
+              z={5}
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+
+        <div className="flex justify-between ml-16 mt-2">
           {[2019, 2020, 2021, 2022, 2023, 2024].map((year) => {
             return (
               <div key={year} className=" text-gray-400 text-xs">
