@@ -46,27 +46,38 @@ const yearFilters = [
   },
 ];
 
-const ChartCard = () => {
-  const generateData = () => {
+const ChartCard = ({ trend }: { trend: string }) => {
+  const generateData = (trendType: string) => {
     const data = [];
     const numDataPoints = 100; // Adjust this for more or fewer points
     let currentValue = 1000; // Starting value
+    const minValue = 100; // Set a minimum value to prevent negative values
 
     for (let i = 0; i < numDataPoints; i++) {
-      const volatility = Math.random() * 1000; // Increased volatility
-      let direction = Math.random(); // Random direction of the trend
+      let change = 0;
 
-      if (Math.random() > 0.8) {
-        direction *= -1; // Change direction more frequently
+      switch (trendType) {
+        case "constant":
+          change = 0;
+          break;
+        case "increasing":
+          change = Math.random() * 100; // Adjust for desired rate of increase
+          break;
+        case "decreasing":
+          change = -(Math.random() * 1); // Adjust for desired rate of decrease
+          break;
+        default:
+          break;
       }
 
-      currentValue += volatility * direction; // Apply the change to the current value
-      data.push({ x: new Date(2020, 0, i + 10), y: currentValue }); // Add the new value to the dataset
+      currentValue += change;
+      currentValue = Math.max(currentValue, minValue); // Ensure currentValue doesn't go below minValue
+      data.push({ x: new Date(2020, 0, i + 10), y: currentValue });
     }
     return data;
   };
 
-  const data = generateData().map((el) => {
+  const data = generateData(trend).map((el) => {
     return { ...el, x: moment(el.x).valueOf() };
   });
 
