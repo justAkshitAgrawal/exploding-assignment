@@ -21,7 +21,7 @@ const DataPage = () => {
       </div>
       <p className="mt-10 px-4 max-md:text-xs text-gray-600">{`Data solution concept combining "data warehouse" and "data lake".`}</p>
       <div className="mt-10 max-md:px-4">
-        <ChartCard trend="increasing" />
+        <ChartCard trend="decreasing" />
       </div>
       <div className="mt-10 max-md:px-4">
         <CategoriesCard />
